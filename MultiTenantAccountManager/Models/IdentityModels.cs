@@ -68,7 +68,7 @@ namespace MultiTenantAccountManager.Models
             modelBuilder.Entity<IdentityUserClaim>().ToTable("UserClaims");
             modelBuilder.Entity<IdentityUserLogin>().ToTable("UserLogins");
 
-            // remove username global uniqueness requirement
+            // set username uniqueness requirement inside tenant
             modelBuilder
                 .Entity<ApplicationUser>()
                 .Property(it => it.UserName)
