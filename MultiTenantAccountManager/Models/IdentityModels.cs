@@ -68,11 +68,15 @@ namespace MultiTenantAccountManager.Models
             modelBuilder.Entity<IdentityUserClaim>().ToTable("UserClaims");
             modelBuilder.Entity<IdentityUserLogin>().ToTable("UserLogins");
 
-            // remove username uniqueness
+            // remove username global uniqueness requirement
             modelBuilder
                 .Entity<ApplicationUser>()
                 .Property(it => it.UserName)
-                .HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new IndexAttribute("UserNameIndex") { IsUnique = false }));
+                .HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new IndexAttribute("UserNameIndex") { IsUnique = true, Order = 1 }));
+            modelBuilder
+                .Entity<ApplicationUser>()
+                .Property(it => it.TenantId)
+                .HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new IndexAttribute("UserNameIndex") { IsUnique = true, Order = 2 }));
         }
 
         protected override DbEntityValidationResult ValidateEntity(DbEntityEntry entityEntry, IDictionary<object, object> items)
@@ -127,12 +131,12 @@ namespace MultiTenantAccountManager.Models
             using (var manager = new ApplicationUserManager(new UserStore<ApplicationUser>(context)))
             {
                 manager.UserValidator = new ApplicationUserValidator(manager);
-                var adminUser = manager.FindByName("admin", tenantId);
+                var adminUser = manager.FindByNameAsync("admin", tenantId).Result;
                 if (adminUser == null)
                 {
                     adminUser = new ApplicationUser() { UserName = "admin", Email = "admin@admin.com", TenantId = tenant?.Id, Tenant = tenant };
                     var res = manager.Create(adminUser, "adm1n_");
-                    adminUser = manager.FindByName("admin", tenantId);
+                    adminUser = manager.FindByNameAsync("admin", tenantId).Result;
                 }
 
                 manager.AddToRole(adminUser.Id, "SuperAdmin");

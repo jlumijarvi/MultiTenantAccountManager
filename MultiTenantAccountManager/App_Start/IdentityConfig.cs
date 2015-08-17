@@ -22,7 +22,14 @@ namespace MultiTenantAccountManager
         {
         }
 
+        [Obsolete("Not supported", true)]
         public override Task<ApplicationUser> FindByNameAsync(string userName)
+        {
+            throw new NotImplementedException();
+        }
+
+        [Obsolete("Not supported", true)]
+        public override Task<ApplicationUser> FindAsync(string userName, string password)
         {
             throw new NotImplementedException();
         }
@@ -30,12 +37,6 @@ namespace MultiTenantAccountManager
         public async Task<ApplicationUser> FindByNameAsync(string userName, string tenantIdOrName)
         {
             var ret = await Users.FirstOrDefaultAsync(it => (it.TenantId == tenantIdOrName || it.Tenant.Name == tenantIdOrName) && it.UserName == userName);
-            return ret;
-        }
-
-        public ApplicationUser FindByName(string userName, string tenantIdOrName)
-        {
-            var ret =  Users.FirstOrDefault(it => (it.TenantId == tenantIdOrName || it.Tenant.Name == tenantIdOrName) && it.UserName == userName);
             return ret;
         }
 
